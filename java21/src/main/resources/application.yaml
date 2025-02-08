@@ -1,0 +1,15 @@
+logging:
+  level:
+    org.springframework: INFO
+
+spring:
+  threads:
+    virtual:
+      enabled: true
+  jackson:
+    default-property-inclusion: non_null
+  jpa:
+    open-in-view: false
+
+server:
+  port: 9000
