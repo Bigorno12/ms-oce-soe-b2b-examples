@@ -50,13 +50,18 @@ allprojects {
 
 dependencies {
     //oce mise bom
+    implementation platform("com.swisscom.oce:oce-mise-bom:$oceMiseBomVersion")
     implementation("com.swisscom.oce:oce-mise-bom:$oceMiseBomVersion")
     //spring Modulith Bom
     implementation platform("org.springframework.modulith:spring-modulith-bom:${springModulithVersion}")
+    //lombok
+    compileOnly("org.projectlombok:lombok")
     // Spring boot
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
+    //h2
+    runtimeOnly("com.h2database:h2")
 }
 
 openApiValidate {
