@@ -9,7 +9,7 @@ import org.springframework.web.service.annotation.PostExchange;
 
 import java.util.List;
 
-@HttpExchange("/posts")
+@HttpExchange(url = "/posts")
 public interface PostClient {
     @GetExchange
     List<Post> posts();
@@ -17,6 +17,6 @@ public interface PostClient {
     @GetExchange("/{id}")
     Post todoById(@PathVariable Long id);
 
-    @PostExchange("/todos")
+    @PostExchange()
     void createTodo(@RequestBody Post post);
 }

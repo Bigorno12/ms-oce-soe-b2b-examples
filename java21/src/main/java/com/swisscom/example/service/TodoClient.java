@@ -9,15 +9,15 @@ import org.springframework.web.service.annotation.PostExchange;
 
 import java.util.List;
 
-@HttpExchange
+@HttpExchange(url = "/todos")
 public interface TodoClient {
 
-    @GetExchange("/todos")
+    @GetExchange()
     List<Todo> todos();
 
-    @GetExchange("/todos/{id}")
+    @GetExchange("/{id}")
     Todo todoById(@PathVariable Long id);
 
-    @PostExchange("/todos")
+    @PostExchange()
     void createTodo(@RequestBody Todo todo);
 }
