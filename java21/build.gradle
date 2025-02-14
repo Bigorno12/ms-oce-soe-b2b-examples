@@ -51,6 +51,9 @@ dependencies {
     // Openapi
     implementation "io.swagger.core.v3:swagger-annotations:${swaggerAnnotations}"
     implementation "jakarta.validation:jakarta.validation-api:${jakarta}"
+    // H2
+    runtimeOnly("com.h2database:h2")
+
 }
 
 test {
