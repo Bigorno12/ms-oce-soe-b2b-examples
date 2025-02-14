@@ -52,10 +52,10 @@ allprojects {
 
 dependencies {
     //oce mise bom
-    implementation platform("com.swisscom.oce:oce-mise-bom:$oceMiseBomVersion")
+    implementation enforcedPlatform("com.swisscom.oce:oce-mise-bom:$oceMiseBomVersion")
     implementation("com.swisscom.oce:oce-mise-bom:$oceMiseBomVersion")
     //spring Modulith Bom
-    implementation platform("org.springframework.modulith:spring-modulith-bom:${springModulithVersion}")
+    implementation enforcedPlatform("org.springframework.modulith:spring-modulith-bom:${springModulithVersion}")
     //lombok
     compileOnly("org.projectlombok:lombok")
     // Spring boot
