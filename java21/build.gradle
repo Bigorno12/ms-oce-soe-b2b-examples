@@ -1,3 +1,5 @@
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.2'
@@ -37,7 +39,7 @@ ext {
 
 dependencies {
     //Spring Modulith
-    implementation platform("org.springframework.modulith:spring-modulith-bom:${springModulithVersion}")
+    implementation enforcedPlatform("org.springframework.modulith:spring-modulith-bom:${springModulithVersion}")
     //Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -49,33 +51,6 @@ dependencies {
     // Openapi
     implementation "io.swagger.core.v3:swagger-annotations:${swaggerAnnotations}"
     implementation "jakarta.validation:jakarta.validation-api:${jakarta}"
-}
-
-openApiValidate {
-    inputSpec.set("$projectDir/java21/../openapi/petstore.yaml")
-}
-
-openApiGenerate {
-    generatorName.set("java")
-    inputSpec.set("$projectDir/java21/../openapi/petstore.yaml")
-    outputDir.set("${projectDir}/build/generated/openapi")
-    apiPackage.set("com.swisscom.example.api")
-    modelPackage.set("com.swisscom.example.model")
-    skipValidateSpec.set(true)
-    configOptions.set([
-            collectionType    : 'list',
-            dateLibrary       : 'java21',
-            enumPropertyNaming: 'UPPERCASE',
-            java21            : 'true',
-            interfaceOnly     : 'true',
-            library           : 'restclient',
-            openApiNullable   : 'false',
-            useJakartaEe      : 'true'
-    ])
-    generateApiTests.set(false)
-    generateModelTests.set(false)
-    generateApiDocumentation.set(false)
-    generateModelDocumentation.set(false)
 }
 
 test {
@@ -90,7 +65,40 @@ sourceSets {
     }
 }
 
+def apis = new HashSet<String>()
+fileTree("$projectDir/openapi/").matching {
+    include("**/*.yaml")
+}.each { file ->
+    def fileName = file.name.take(file.name.lastIndexOf('.')).replace("-", "")
+    def taskName = "generate_${fileName}"
+
+    tasks.register(taskName, GenerateTask) {
+        generatorName.set("java")
+        inputSpec.set(file.path)
+        outputDir.set("${projectDir}/build/generated/openapi")
+        apiPackage.set("com.swisscom.example.${fileName}.api")
+        modelPackage.set("com.swisscom.example.${fileName}.model")
+        skipValidateSpec.set(true)
+        validateSpec.set(true)
+        configOptions.set([
+                collectionType    : 'list',
+                dateLibrary       : 'java21',
+                enumPropertyNaming: 'UPPERCASE',
+                java21            : 'true',
+                interfaceOnly     : 'true',
+                library           : 'restclient',
+                openApiNullable   : 'false',
+                useJakartaEe      : 'true'
+        ])
+        generateApiTests.set(false)
+        generateModelTests.set(false)
+        generateApiDocumentation.set(false)
+        generateModelDocumentation.set(false)
+    }
+
+    apis.add(taskName)
+}
+
 tasks.compileJava {
-    dependsOn(tasks.openApiValidate)
-    dependsOn(tasks.openApiGenerate)
+    dependsOn(apis.stream().map { tasks.named it }.toList())
 }
