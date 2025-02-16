@@ -1,4 +1,4 @@
-package com.swisscom.example.model;
+package com.swisscom.example.dto;
 
 public record Todo(Long id, Long userId, String title) implements JsonPlaceHolder {
     public Todo {

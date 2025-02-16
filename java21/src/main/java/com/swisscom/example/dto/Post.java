@@ -1,4 +1,4 @@
-package com.swisscom.example.model;
+package com.swisscom.example.dto;
 
 public record Post(Long id, Long userId, String title, String body) implements JsonPlaceHolder {
     public Post {
