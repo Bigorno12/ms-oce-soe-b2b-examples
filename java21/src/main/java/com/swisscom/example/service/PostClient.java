@@ -1,6 +1,6 @@
 package com.swisscom.example.service;
 
-import com.swisscom.example.model.Post;
+import com.swisscom.example.dto.Post;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.service.annotation.GetExchange;

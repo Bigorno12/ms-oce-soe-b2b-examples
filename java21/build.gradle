@@ -59,6 +59,7 @@ dependencies {
     //lombok
     compileOnly("org.projectlombok:lombok")
     // Spring boot
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     developmentOnly("org.springframework.boot:spring-boot-devtools")

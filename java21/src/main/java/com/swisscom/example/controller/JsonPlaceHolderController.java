@@ -1,24 +1,34 @@
 package com.swisscom.example.controller;
 
-import com.swisscom.example.model.Todo;
+import com.swisscom.example.model.PostEntity;
+import com.swisscom.example.model.TodoEntity;
 import com.swisscom.example.service.JsonPlaceHolderService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RestController("api/v1/")
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("v1/api/placeHolder")
 public class JsonPlaceHolderController {
-    private final JsonPlaceHolderService service;
 
-    @Autowired
-    public JsonPlaceHolderController(JsonPlaceHolderService service) {
-        this.service = service;
+    private final JsonPlaceHolderService jsonPlaceHolderService;
+
+    @GetMapping("/posts")
+    public List<PostEntity> postEntities() {
+        return jsonPlaceHolderService.getPosts();
     }
 
     @GetMapping("/todos")
-    public List<Todo> retrieveTodos() {
-        return service.retrieveTodos();
+    public List<TodoEntity> todoEntities() {
+        return jsonPlaceHolderService.getTodos();
+    }
+
+    @GetMapping("/newFeatures")
+    public void newFeatures() {
+        jsonPlaceHolderService.sequenceCollector();
     }
 }
