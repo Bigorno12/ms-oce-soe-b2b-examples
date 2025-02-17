@@ -1,6 +1,7 @@
 package com.swisscom.example.controller;
 
 import com.swisscom.example.model.PostEntity;
+import com.swisscom.example.model.TodoEntity;
 import com.swisscom.example.service.JsonPlaceHolderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,5 +20,10 @@ public class JsonPlaceHolderController {
     @GetMapping("/posts")
     public List<PostEntity> postEntities() {
         return jsonPlaceHolderService.getPosts();
+    }
+
+    @GetMapping("/todos")
+    public List<TodoEntity> todoEntities() {
+        return jsonPlaceHolderService.getTodos();
     }
 }
