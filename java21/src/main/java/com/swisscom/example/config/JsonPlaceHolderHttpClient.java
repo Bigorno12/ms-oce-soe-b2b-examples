@@ -1,7 +1,7 @@
 package com.swisscom.example.config;
 
-import com.swisscom.example.service.PostClient;
-import com.swisscom.example.service.TodoClient;
+import com.swisscom.example.client.PostClient;
+import com.swisscom.example.client.TodoClient;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

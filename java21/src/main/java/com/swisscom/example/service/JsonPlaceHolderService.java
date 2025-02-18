@@ -1,5 +1,7 @@
 package com.swisscom.example.service;
 
+import com.swisscom.example.client.PostClient;
+import com.swisscom.example.client.TodoClient;
 import com.swisscom.example.dto.JsonPlaceHolder;
 import com.swisscom.example.dto.Post;
 import com.swisscom.example.dto.Todo;
@@ -13,13 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.swisscom.example.util.NewFeatures.addElementInFirstAndLastPosition;
-import static com.swisscom.example.util.NewFeatures.instanceOfPattern;
-import static com.swisscom.example.util.NewFeatures.removeElementInFirstAndLastPosition;
-import static com.swisscom.example.util.NewFeatures.retrieveFistAndLastElement;
-import static com.swisscom.example.util.NewFeatures.reverseList;
-import static com.swisscom.example.util.NewFeatures.switchPattern;
+import java.util.function.UnaryOperator;
 
 @Slf4j
 @Service
@@ -77,5 +73,67 @@ public class JsonPlaceHolderService {
                 .andThen(reverseList())
                 .andThen(removeElementInFirstAndLastPosition())
                 .apply(jsonPlaceHolders);
+    }
+
+    private String instanceOfPattern(JsonPlaceHolder jsonPlaceHolder) {
+        if (jsonPlaceHolder instanceof Post post) {
+            return "Display body of post using instance of pattern: " + post.body();
+        }
+
+        if (jsonPlaceHolder instanceof Todo(var id, var userId, var title)) {
+            return """
+                    Using instance of pattern
+                    Using record deconstruction to get the individual parameter.
+                    Can use var to infer the title define in the record.
+                    Display the title of Todo:
+                    """ + title;
+        }
+        return "";
+    }
+
+    private String switchPattern(JsonPlaceHolder jsonPlaceHolder) {
+        return switch (jsonPlaceHolder) {
+            case Post post -> "Display body of post using instance of pattern: " + post.body();
+            case Todo(var id, var userId, var title) -> """
+                    Using instance of pattern
+                    Using record deconstruction to get the individual parameter.
+                    Can use var to infer the title define in the record.
+                    Display the title of Todo:
+                    """ + title;
+        };
+    }
+
+    private void retrieveFistAndLastElement(List<JsonPlaceHolder> jsonPlaceHolders) {
+        log.info("Get first element of the list: {}", jsonPlaceHolders.getFirst());
+        log.info("Get last element of the list: {}", jsonPlaceHolders.getLast());
+    }
+
+    private UnaryOperator<List<JsonPlaceHolder>> addElementInFirstAndLastPosition() {
+        return jsonPlaceHolders -> {
+            jsonPlaceHolders.addFirst(new Todo(2L, 2L, "First Position Title Todo"));
+            jsonPlaceHolders.addLast(new Post(2L, 2L, "First Position Title Post", "First Postion Body Body"));
+
+            log.info("New First Element: {}", jsonPlaceHolders.getFirst());
+            log.info("New Last Element: {}", jsonPlaceHolders.getLast());
+            return jsonPlaceHolders;
+        };
+    }
+
+    private UnaryOperator<List<JsonPlaceHolder>> removeElementInFirstAndLastPosition() {
+        return jsonPlaceHolders -> {
+            jsonPlaceHolders.removeFirst();
+            jsonPlaceHolders.removeLast();
+
+            log.info("New First Element when remove: {}", jsonPlaceHolders.getFirst());
+            log.info("New Last Element when remove: {}", jsonPlaceHolders.getLast());
+            return jsonPlaceHolders;
+        };
+    }
+
+    private UnaryOperator<List<JsonPlaceHolder>> reverseList() {
+        return jsonPlaceHolders -> {
+            log.info("Reverser List: {}", jsonPlaceHolders.reversed());
+            return jsonPlaceHolders.reversed();
+        };
     }
 }
