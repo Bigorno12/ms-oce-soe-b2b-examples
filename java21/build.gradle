@@ -1,12 +1,30 @@
-plugins {
-    id 'java'
-    id 'org.springframework.boot' version '3.4.2'
-    id 'io.spring.dependency-management' version '1.1.7'
-    id "org.openapi.generator" version "7.10.0"
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+
+buildscript {
+    repositories {
+        maven {
+            url 'https://artifactory.swisscom.com/artifactory/oce-ref-maven-virtual'
+            credentials {
+                username = "${artifactory_user}"
+                password = "${artifactory_password}"
+            }
+        }
+        mavenCentral()
+        mavenLocal()
+
+    }
+    dependencies {
+        //Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4+"
+    }
 }
 
-group = 'com.swisscom'
-version = '1.0-SNAPSHOT'
+plugins {
+    id 'java'
+    id('org.springframework.boot') version '3.4.2'
+    id('io.spring.dependency-management') version '1.1.7'
+    id "org.openapi.generator" version "7.10.0"
+}
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
@@ -22,64 +40,36 @@ configurations {
     }
 }
 
-repositories {
-    mavenCentral()
-    google()
-    mavenLocal()
-}
-
 ext {
+    set("revision", "1.194.0")
     set('springModulithVersion', "1.3.1")
     set('swaggerAnnotations', "2.2.28")
     set('jakarta', "3.1.1")
     set('annotationApi', "3.0.0")
+    set("oceMiseBomVersion", "16.0.1")
+}
+
+group = 'com.swisscom.oce.java'
+version = "$revision"
+
+allprojects {
+    apply plugin: "com.jfrog.artifactory"
 }
 
 dependencies {
-    //Spring Modulith
-    implementation platform("org.springframework.modulith:spring-modulith-bom:${springModulithVersion}")
-    //Lombok
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-    //Spring Boot
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    // Openapi
-    implementation "io.swagger.core.v3:swagger-annotations:${swaggerAnnotations}"
-    implementation "jakarta.validation:jakarta.validation-api:${jakarta}"
-}
-
-openApiValidate {
-    inputSpec.set("$projectDir/java21/../openapi/petstore.yaml")
-}
-
-openApiGenerate {
-    generatorName.set("java")
-    inputSpec.set("$projectDir/java21/../openapi/petstore.yaml")
-    outputDir.set("${projectDir}/build/generated/openapi")
-    apiPackage.set("com.swisscom.example.api")
-    modelPackage.set("com.swisscom.example.model")
-    skipValidateSpec.set(true)
-    configOptions.set([
-            collectionType    : 'list',
-            dateLibrary       : 'java21',
-            enumPropertyNaming: 'UPPERCASE',
-            java21            : 'true',
-            interfaceOnly     : 'true',
-            library           : 'restclient',
-            openApiNullable   : 'false',
-            useJakartaEe      : 'true'
-    ])
-    generateApiTests.set(false)
-    generateModelTests.set(false)
-    generateApiDocumentation.set(false)
-    generateModelDocumentation.set(false)
-}
-
-test {
-    useJUnit()
+    //oce mise bom
+    implementation enforcedPlatform("com.swisscom.oce:oce-mise-bom:$oceMiseBomVersion")
+    implementation("com.swisscom.oce:oce-mise-bom:$oceMiseBomVersion")
+    //spring Modulith Bom
+    implementation enforcedPlatform("org.springframework.modulith:spring-modulith-bom:${springModulithVersion}")
+    //lombok
+    compileOnly("org.projectlombok:lombok")
+    // Spring boot
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    //h2
+    runtimeOnly("com.h2database:h2")
 }
 
 sourceSets {
@@ -90,7 +80,62 @@ sourceSets {
     }
 }
 
+def apis = new HashSet<String>()
+fileTree("$projectDir/openapi/").matching {
+    include("**/*.yaml")
+}.each { file ->
+    def fileName = file.name.take(file.name.lastIndexOf('.')).replace("-", "")
+    def taskName = "generate_${fileName}"
+
+    tasks.register(taskName, GenerateTask) {
+        generatorName.set("java")
+        inputSpec.set(file.path)
+        outputDir.set("${projectDir}/build/generated/openapi")
+        apiPackage.set("com.swisscom.example.${fileName}.api")
+        modelPackage.set("com.swisscom.example.${fileName}.model")
+        skipValidateSpec.set(true)
+        validateSpec.set(true)
+        configOptions.set([
+                collectionType    : 'list',
+                dateLibrary       : 'java21',
+                enumPropertyNaming: 'UPPERCASE',
+                java21            : 'true',
+                interfaceOnly     : 'true',
+                library           : 'restclient',
+                openApiNullable   : 'false',
+                useJakartaEe      : 'true'
+        ])
+        generateApiTests.set(false)
+        generateModelTests.set(false)
+        generateApiDocumentation.set(false)
+        generateModelDocumentation.set(false)
+    }
+
+    apis.add(taskName)
+}
+
 tasks.compileJava {
-    dependsOn(tasks.openApiValidate)
-    dependsOn(tasks.openApiGenerate)
+    dependsOn(apis.stream().map { tasks.named it }.toList())
+}
+
+artifactory {
+    contextUrl = "${artifactory_contextUrl}"   //The base Artifactory URL if not overridden by the publisher/resolver
+    publish {
+        repository {
+            repoKey = 'oce-ref-maven-release-local'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = true
+
+        }
+    }
+    resolve {
+        repository {
+            repoKey = 'oce-ref-maven-virtual'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = true
+
+        }
+    }
 }
