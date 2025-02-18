@@ -18,6 +18,7 @@ import static com.swisscom.example.util.NewFeatures.addElementInFirstAndLastPosi
 import static com.swisscom.example.util.NewFeatures.instanceOfPattern;
 import static com.swisscom.example.util.NewFeatures.removeElementInFirstAndLastPosition;
 import static com.swisscom.example.util.NewFeatures.retrieveFistAndLastElement;
+import static com.swisscom.example.util.NewFeatures.reverseList;
 import static com.swisscom.example.util.NewFeatures.switchPattern;
 
 @Slf4j
@@ -73,6 +74,7 @@ public class JsonPlaceHolderService {
         });
 
         addElementInFirstAndLastPosition()
+                .andThen(reverseList())
                 .andThen(removeElementInFirstAndLastPosition())
                 .apply(jsonPlaceHolders);
     }

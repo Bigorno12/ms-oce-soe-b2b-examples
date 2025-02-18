@@ -67,4 +67,11 @@ public class NewFeatures {
             return jsonPlaceHolders;
         };
     }
+
+    public static UnaryOperator<List<JsonPlaceHolder>> reverseList() {
+        return jsonPlaceHolders -> {
+          log.info("Reverser List: {}", jsonPlaceHolders.reversed());
+          return jsonPlaceHolders.reversed();
+        };
+    }
 }
