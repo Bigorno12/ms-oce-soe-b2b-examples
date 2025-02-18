@@ -1,5 +1,7 @@
 package com.swisscom.example.service;
 
+import com.swisscom.example.client.PostClient;
+import com.swisscom.example.client.TodoClient;
 import com.swisscom.example.dto.JsonPlaceHolder;
 import com.swisscom.example.dto.Post;
 import com.swisscom.example.dto.Todo;
@@ -68,6 +70,7 @@ public class JsonPlaceHolderService {
         });
 
         addElementInFirstAndLastPosition()
+                .andThen(reverseList())
                 .andThen(removeElementInFirstAndLastPosition())
                 .apply(jsonPlaceHolders);
     }
@@ -124,6 +127,13 @@ public class JsonPlaceHolderService {
             log.info("New First Element when remove: {}", jsonPlaceHolders.getFirst());
             log.info("New Last Element when remove: {}", jsonPlaceHolders.getLast());
             return jsonPlaceHolders;
+        };
+    }
+
+    private UnaryOperator<List<JsonPlaceHolder>> reverseList() {
+        return jsonPlaceHolders -> {
+            log.info("Reverser List: {}", jsonPlaceHolders.reversed());
+            return jsonPlaceHolders.reversed();
         };
     }
 }

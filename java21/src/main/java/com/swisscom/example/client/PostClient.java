@@ -1,4 +1,4 @@
-package com.swisscom.example.service;
+package com.swisscom.example.client;
 
 import com.swisscom.example.dto.Post;
 import org.springframework.web.bind.annotation.PathVariable;

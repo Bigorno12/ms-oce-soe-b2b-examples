@@ -26,4 +26,9 @@ public class JsonPlaceHolderController {
     public List<TodoEntity> todoEntities() {
         return jsonPlaceHolderService.getTodos();
     }
+
+    @GetMapping("/newFeatures")
+    public void newFeatures() {
+        jsonPlaceHolderService.sequenceCollector();
+    }
 }
