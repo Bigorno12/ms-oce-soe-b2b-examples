@@ -46,7 +46,7 @@ ext {
     set('swaggerAnnotations', "2.2.28")
     set('jakarta', "3.1.1")
     set('annotationApi', "3.0.0")
-    set("oceMiseBomVersion", "16.0.1")
+    set("oceMiseBomVersion", "16.3.0")
 }
 
 group = 'com.swisscom.oce.java'
@@ -59,7 +59,9 @@ allprojects {
 dependencies {
     //oce mise bom
     implementation enforcedPlatform("com.swisscom.oce:oce-mise-bom:$oceMiseBomVersion")
-    implementation("com.swisscom.oce:oce-mise-bom:$oceMiseBomVersion")
+    implementation("com.swisscom.oce:oce-mise-bom:$oceMiseBomVersion") {
+        exclude group: "com.swisscom.oce", module: "oce-mise-security"
+    }
     //spring Modulith Bom
     implementation enforcedPlatform("org.springframework.modulith:spring-modulith-bom:${springModulithVersion}")
     //lombok
