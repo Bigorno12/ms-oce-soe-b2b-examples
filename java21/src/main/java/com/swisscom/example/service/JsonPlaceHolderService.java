@@ -3,19 +3,21 @@ package com.swisscom.example.service;
 import com.swisscom.example.client.PostClient;
 import com.swisscom.example.client.TodoClient;
 import com.swisscom.example.dto.JsonPlaceHolder;
-import com.swisscom.example.dto.JsonPlaceHolder.Post;
-import com.swisscom.example.dto.JsonPlaceHolder.Todo;
+import com.swisscom.example.dto.Post;
+import com.swisscom.example.dto.Todo;
 import com.swisscom.example.model.PostEntity;
 import com.swisscom.example.model.TodoEntity;
 import com.swisscom.example.repository.PostRepository;
 import com.swisscom.example.repository.TodoRepository;
-import com.swisscom.example.util.NewFeatures;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static com.swisscom.example.util.NewFeatures.*;
 
@@ -43,32 +45,39 @@ public class JsonPlaceHolderService {
         return postRepository.saveAll(postEntities);
     }
 
+    @SneakyThrows
     public List<TodoEntity> getTodos() {
-        var todoEntities = todoClient.todos()
-                .stream()
-                .map(todo -> TodoEntity.builder()
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            Future<List<Todo>> submit = executor.submit(todoClient::todos);
+            var todoEntities = switch (submit.state()) {
+                case RUNNING, CANCELLED -> List.of(TodoEntity.builder().build());
+                case SUCCESS -> submit.get().parallelStream().map(todo -> TodoEntity.builder()
                         .id(todo.id())
                         .userId(todo.userId())
                         .title(todo.title())
                         .build()
-                )
-                .toList();
+                ).toList();
+                case FAILED -> {
+                    log.error("Failed to get todos");
+                    throw new RuntimeException();
+                }
+            };
+            return todoRepository.saveAll(todoEntities);
+        }
 
-        return todoRepository.saveAll(todoEntities);
     }
 
     public void sequenceCollector() {
-        List<JsonPlaceHolder> jsonPlaceHolders = new ArrayList<>() {
-        };
+        List<JsonPlaceHolder> jsonPlaceHolders = new ArrayList<>();
 
         jsonPlaceHolders.add(new Post(1L, 1L, "This is a Post Title", "Post Body"));
         jsonPlaceHolders.add(new Todo(1L, 1L, "Need todo"));
 
-        NewFeatures.retrieveFistAndLastElement(jsonPlaceHolders);
+        retrieveFistAndLastElement(jsonPlaceHolders);
 
         jsonPlaceHolders.forEach(jsonPlaceHolder -> {
-            log.info(instanceOfPattern(jsonPlaceHolder));
-            log.info(switchPattern(jsonPlaceHolder));
+            log.info(instanceOfPattern().apply(jsonPlaceHolder));
+            log.info(switchPattern().apply(jsonPlaceHolder));
         });
 
         addElementInFirstAndLastPosition()

@@ -1,42 +1,48 @@
 package com.swisscom.example.util;
 
 import com.swisscom.example.dto.JsonPlaceHolder;
+import com.swisscom.example.dto.Post;
+import com.swisscom.example.dto.Todo;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 @Slf4j
 @UtilityClass
 public class NewFeatures {
 
-    public static String instanceOfPattern(JsonPlaceHolder jsonPlaceHolder) {
-        if (jsonPlaceHolder instanceof JsonPlaceHolder.Post post) {
-            return "Display body of post using instance of pattern: " + post.body();
-        }
 
-        if (jsonPlaceHolder instanceof JsonPlaceHolder.Todo(var id, var userId, var title) && !title.isEmpty() && userId != null) {
-            return """
-                    Using instance of pattern
-                    Using record deconstruction to get the individual parameter.
-                    Can use var to infer the title define in the record.
-                    Display the title of Todo:
-                    """ + title;
-        }
-        return "";
+    public static Function<JsonPlaceHolder, String> instanceOfPattern() {
+        return jsonPlaceHolder -> {
+            if (jsonPlaceHolder instanceof Post post) {
+                return "Display body of post using instance of pattern: " + post.body();
+            }
+
+            if (jsonPlaceHolder instanceof Todo(var id, var userId, var title) && !title.isEmpty() && userId != null) {
+                return """
+                               Using instance of pattern
+                               Using record deconstruction to get the individual parameter.
+                               Can use var to infer the title define in the record.
+                               Display the title of Todo:
+                               """ + title;
+            }
+            return "";
+        };
     }
 
-    public static String switchPattern(JsonPlaceHolder jsonPlaceHolder) {
-        return switch (jsonPlaceHolder) {
-            case JsonPlaceHolder.Post post -> "Display body of post using instance of pattern: " + post.body();
-            case JsonPlaceHolder.Todo(var id, var userId, var title) when !title.isEmpty() -> """
-                    Using Switch of pattern using when keyword
-                    Using record deconstruction to get the individual parameter.
-                    Can use var to infer the title define in the record.
-                    Display the title of Todo:
-                    """ + title;
-            case JsonPlaceHolder.Todo todo -> "";
+    public static Function<JsonPlaceHolder, String> switchPattern() {
+        return jsonPlaceHolder -> switch (jsonPlaceHolder) {
+            case Post post -> "Display body of post using instance of pattern: " + post.body();
+            case Todo(var id, var userId, var title) when !title.isEmpty() -> """
+                                                                                      Using Switch of pattern using when keyword
+                                                                                      Using record deconstruction to get the individual parameter.
+                                                                                      Can use var to infer the title define in the record.
+                                                                                      Display the title of Todo:
+                                                                                      """ + title;
+            case Todo todo -> "";
             case null -> throw new IllegalArgumentException("JsonPlaceHolder is null");
         };
     }
@@ -48,8 +54,8 @@ public class NewFeatures {
 
     public static UnaryOperator<List<JsonPlaceHolder>> addElementInFirstAndLastPosition() {
         return jsonPlaceHolders -> {
-            jsonPlaceHolders.addFirst(new JsonPlaceHolder.Todo(2L, 2L, "First Position Title Todo"));
-            jsonPlaceHolders.addLast(new JsonPlaceHolder.Post(2L, 2L, "First Position Title Post", "First Postion Body Body"));
+            jsonPlaceHolders.addFirst(new Todo(2L, 2L, "First Position Title Todo"));
+            jsonPlaceHolders.addLast(new Post(2L, 2L, "First Position Title Post", "First Postion Body Body"));
 
             log.info("New First Element: {}", jsonPlaceHolders.getFirst());
             log.info("New Last Element: {}", jsonPlaceHolders.getLast());
