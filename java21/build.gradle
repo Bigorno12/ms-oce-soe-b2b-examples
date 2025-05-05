@@ -58,12 +58,9 @@ allprojects {
 
 dependencies {
     //oce mise bom
-    implementation enforcedPlatform("com.swisscom.oce:oce-mise-bom:$oceMiseBomVersion")
     implementation("com.swisscom.oce:oce-mise-bom:$oceMiseBomVersion") {
         exclude group: "com.swisscom.oce", module: "oce-mise-security"
     }
-    //spring Modulith Bom
-    implementation enforcedPlatform("org.springframework.modulith:spring-modulith-bom:${springModulithVersion}")
     //lombok
     compileOnly("org.projectlombok:lombok")
     // Spring boot
@@ -79,6 +76,13 @@ sourceSets {
         java {
             srcDir("${projectDir}/build/generated/openapi/src/main/java")
         }
+    }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "com.swisscom.oce:oce-mise-bom:$oceMiseBomVersion"
+        mavenBom "org.springframework.modulith:spring-modulith-bom:${springModulithVersion}"
     }
 }
 
@@ -118,6 +122,10 @@ fileTree("$projectDir/openapi/").matching {
 
 tasks.compileJava {
     dependsOn(apis.stream().map { tasks.named it }.toList())
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 artifactory {

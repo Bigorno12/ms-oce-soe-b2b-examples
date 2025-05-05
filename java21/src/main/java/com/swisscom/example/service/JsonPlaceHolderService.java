@@ -34,12 +34,11 @@ public class JsonPlaceHolderService {
     public List<PostEntity> getPosts() {
         var postEntities = postClient.posts()
                 .stream()
-                .map(post -> PostEntity.builder()
+                .map(post -> new PostEntity()
                         .id(post.id())
                         .userId(post.userId())
                         .title(post.title())
                         .body(post.body())
-                        .build()
                 )
                 .toList();
         return postRepository.saveAll(postEntities);
@@ -50,12 +49,11 @@ public class JsonPlaceHolderService {
         try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
             Future<List<Todo>> submit = executor.submit(todoClient::todos);
             var todoEntities = switch (submit.state()) {
-                case RUNNING, CANCELLED -> List.of(TodoEntity.builder().build());
-                case SUCCESS -> submit.get().parallelStream().map(todo -> TodoEntity.builder()
+                case RUNNING, CANCELLED -> List.of(new TodoEntity());
+                case SUCCESS -> submit.get().parallelStream().map(todo -> new TodoEntity()
                         .id(todo.id())
                         .userId(todo.userId())
                         .title(todo.title())
-                        .build()
                 ).toList();
                 case FAILED -> {
                     log.error("Failed to get todos");
