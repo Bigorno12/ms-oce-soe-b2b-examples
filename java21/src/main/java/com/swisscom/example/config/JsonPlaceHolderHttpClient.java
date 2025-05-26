@@ -10,22 +10,21 @@ import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 @Configuration
-public class JsonPlaceHolderHttpClient {
+class JsonPlaceHolderHttpClient {
 
     private final RestClient restClient;
-
-    public JsonPlaceHolderHttpClient(@Qualifier("placeHolderRestClient") RestClient restClient) {
+    JsonPlaceHolderHttpClient(@Qualifier("placeHolderRestClient") RestClient restClient) {
         this.restClient = restClient;
     }
 
     @Bean
-    public TodoClient todoClient() {
+    TodoClient todoClient() {
         HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builderFor(RestClientAdapter.create(restClient)).build();
         return proxyFactory.createClient(TodoClient.class);
     }
 
     @Bean
-    public PostClient postClient() {
+    PostClient postClient() {
         HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builderFor(RestClientAdapter.create(restClient)).build();
         return proxyFactory.createClient(PostClient.class);
     }

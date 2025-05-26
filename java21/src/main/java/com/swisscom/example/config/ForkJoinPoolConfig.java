@@ -9,7 +9,7 @@ import java.util.concurrent.Executor;
 
 @EnableAsync
 @Configuration
-public class ForkJoinPoolConfig implements AsyncConfigurer {
+class ForkJoinPoolConfig implements AsyncConfigurer {
 
     @Override
     public Executor getAsyncExecutor() {
